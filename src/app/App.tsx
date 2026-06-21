@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import "./App.css";
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -34,12 +35,12 @@ interface OrgData {
 const DADOS_PADRAO: OrgData = {
   titulo: "ORGANOGRAMA E PROCESSOS POR SETOR",
   noTopo: "DIRETORIA\nGERAL",
-  iconeTopo: "👤",
+  iconeTopo: "👩‍💼",
   departamentos: [
     {
       id: "admin",
-      nome: "DIRETORIA\nADMINISTRATIVA",
-      icone: "👤",
+      nome: "ADMINISTRAÇÃO",
+      icone: "🏢",
       tituloProcessos: "PROCESSOS",
       processos: [
         "Planejamento estratégico administrativo",
@@ -173,13 +174,13 @@ const DADOS_PADRAO: OrgData = {
 // ─── Cores do design (baseadas no site Prospecta) ──────────────────────────
 
 const C = {
-  navy:       "#0A1628",
-  deptBg:     "#E8EEF5",
-  deptBorder: "#1E3A5F",
-  linha:      "#2C5282",
+  navy:       "#CD4F26",
+  deptBg:     "#FFFFFF",
+  deptBorder: "#CD4F26",
+  linha:      "#FFFFFF",
   branco:     "#FFFFFF",
-  fundo:      "#F7FAFC",
-  accent:     "#C53030",
+  fundo:      "#CD4F26",
+  accent:     "#F59E0B",
 };
 
 // ─── Componente: Texto Editável ───────────────────────────────────────────────
@@ -192,14 +193,16 @@ function TextoEditavel({
   modoEdicao,
   tag: Tag = "span",
   estilo,
+  className,
 }: {
   valor: string;
   aoMudar: (v: string) => void;
   modoEdicao: boolean;
   tag?: keyof JSX.IntrinsicElements;
   estilo?: React.CSSProperties;
+  className?: string;
 }) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<any>(null);
   const editando = useRef(false);
 
   // Atualiza o DOM quando o valor muda externamente (ex: importar JSON)
@@ -236,6 +239,7 @@ function TextoEditavel({
         if (ref.current) aoMudar(ref.current.textContent ?? "");
       }}
       style={{ ...estilo, ...estiloEdicao }}
+      className={className}
     />
   );
 }
@@ -244,6 +248,7 @@ function TextoEditavel({
 
 export default function App() {
   const [modoEdicao, setModoEdicao] = useState(true);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   // Carrega do localStorage ou usa os dados padrão
   const [dados, setDados] = useState<OrgData>(() => {
@@ -255,10 +260,23 @@ export default function App() {
     }
   });
 
+  // Função para resetar para dados padrão
+  const resetarDados = () => {
+    localStorage.removeItem("organograma-v1");
+    setDados(DADOS_PADRAO);
+  };
+
   // Salva automaticamente a cada mudança
   useEffect(() => {
     localStorage.setItem("organograma-v1", JSON.stringify(dados));
   }, [dados]);
+
+  // Define grid-template-columns dinamicamente via CSS variable
+  useEffect(() => {
+    if (gridRef.current) {
+      gridRef.current.style.setProperty("--grid-columns", `repeat(${dados.departamentos.length}, 1fr)`);
+    }
+  }, [dados.departamentos.length]);
 
   // ─── Funções de atualização de estado ───
 
@@ -283,18 +301,6 @@ export default function App() {
       ),
     }));
 
-  const setTransvTitulo    = (v: string) => setDados(d => ({ ...d, transversais: { ...d.transversais, titulo: v } }));
-  const setTransvSubtitulo = (v: string) => setDados(d => ({ ...d, transversais: { ...d.transversais, subtitulo: v } }));
-
-  const setTransvItem = (id: string, v: string) =>
-    setDados(d => ({
-      ...d,
-      transversais: {
-        ...d.transversais,
-        itens: d.transversais.itens.map(it => (it.id === id ? { ...it, texto: v } : it)),
-      },
-    }));
-
   const setIconeDept = (id: string, v: string) =>
     setDados((d: OrgData) => ({
       ...d,
@@ -304,24 +310,6 @@ export default function App() {
     }));
 
   const setIconeTopo = (v: string) => setDados((d: OrgData) => ({ ...d, iconeTopo: v }));
-
-  const setIconeTransv = (id: string, v: string) =>
-    setDados((d: OrgData) => ({
-      ...d,
-      transversais: {
-        ...d.transversais,
-        itens: d.transversais.itens.map((it: ItemTransversal) => (it.id === id ? { ...it, icone: v } : it)),
-      },
-    }));
-
-  const setIconeTransvSecao = (v: string) =>
-    setDados((d: OrgData) => ({
-      ...d,
-      transversais: {
-        ...d.transversais,
-        iconeSecao: v,
-      },
-    }));
 
   const setTituloProcessos = (deptId: string, v: string) =>
     setDados((d: OrgData) => ({
@@ -376,163 +364,84 @@ export default function App() {
 
   return (
     <>
-      <style>{`
-        /* Estado de edição: borda tracejada âmbar nos campos ativos */
-        [contenteditable="true"]:focus {
-          outline: 2px dashed #f59e0b !important;
-          background: rgba(254, 243, 199, 0.55) !important;
-          border-radius: 2px;
-        }
-        [contenteditable="true"] {
-          outline: 1px dashed rgba(245, 158, 11, 0.35);
-          border-radius: 2px;
-        }
-
-        /* Botões da toolbar */
-        .btn-tool {
-          background: rgba(255,255,255,0.13);
-          color: #fff;
-          border: 1px solid rgba(255,255,255,0.22);
-          border-radius: 6px;
-          padding: 6px 13px;
-          cursor: pointer;
-          font-family: 'Roboto', sans-serif;
-          font-size: 12px;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          transition: background 0.14s;
-          white-space: nowrap;
-        }
-        .btn-tool:hover   { background: rgba(255,255,255,0.24); }
-        .btn-tool.ativo   { background: #f59e0b; color: #1a1100; border-color: #f59e0b; }
-        .btn-tool.ativo:hover { background: #fbbf24; }
-
-        /* Responsivo: tablet */
-        @media (max-width: 960px) {
-          .org-grid { grid-template-columns: repeat(4, 1fr) !important; }
-          .svg-conector { display: none !important; }
-          .linha-v-topo { display: none !important; }
-        }
-        /* Responsivo: mobile */
-        @media (max-width: 560px) {
-          .org-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .transv-itens { flex-direction: column !important; }
-        }
-        /* Ocultar toolbar na impressão */
-        @media print {
-          .toolbar { display: none !important; }
-        }
-      `}</style>
-
-      <div style={{ background: C.fundo, minHeight: "100vh", fontFamily: "'Roboto', sans-serif" }}>
+      <div className="app-container">
 
         {/* ══ BARRA DE FERRAMENTAS ══════════════════════════════════════════ */}
-        <div
-          className="toolbar"
-          style={{
-            position: "sticky", top: 0, zIndex: 60,
-            background: C.navy,
-            padding: "12px 24px",
-            display: "flex", alignItems: "center", gap: 16,
-            flexWrap: "wrap",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.35)",
-          }}
-        >
+        <div className="toolbar">
           {/* Logo Prospecta */}
           <img
-            src="/prospecta-logo.jpeg"
+            src="https://prospectario.com.br/wp-content/uploads/2023/01/logo.png"
             alt="Prospecta Logo"
-            style={{
-              height: 40,
-              width: "auto",
-              objectFit: "contain",
-            }}
+            className="toolbar-logo"
           />
 
-          <span style={{ color: "#fff", fontWeight: 900, fontSize: 13, marginRight: 6, letterSpacing: "0.03em" }}>
+          <span className="toolbar-title">
             📊 Organograma Editor
           </span>
 
-          <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
+          <div className="toolbar-buttons">
             <button className="btn-tool" onClick={exportarJSON} aria-label="Exportar JSON">
               📥 Exportar JSON
             </button>
             <button className="btn-tool" onClick={importarJSON} aria-label="Importar JSON">
               📤 Importar JSON
             </button>
+            <button className="btn-tool" onClick={resetarDados} aria-label="Resetar dados">
+              🔄 Resetar
+            </button>
           </div>
 
-          <span style={{ color: "#fcd34d", fontSize: 11, fontStyle: "italic" }}>
+          <span className="toolbar-hint">
             ✏️ Clique em qualquer texto para editar — salvo automaticamente
           </span>
         </div>
 
         {/* ══ CONTEÚDO PRINCIPAL ═══════════════════════════════════════════ */}
         <main
-          style={{ maxWidth: 1600, margin: "0 auto", padding: "32px 24px 60px" }}
+          className="main-content"
           role="main"
           aria-label="Organograma e processos por setor"
         >
 
           {/* Título principal */}
-          <header style={{ textAlign: "center", marginBottom: 28 }}>
+          <header className="main-header">
             <TextoEditavel
               valor={dados.titulo}
               aoMudar={setTitulo}
               modoEdicao={modoEdicao}
               tag="h1"
-              estilo={{
-                fontSize: "clamp(18px, 2.2vw, 26px)",
-                fontWeight: 900,
-                color: C.navy,
-                letterSpacing: "0.07em",
-                textTransform: "uppercase",
-                display: "inline-block",
-                lineHeight: 1.3,
-              }}
+              className="main-title"
             />
           </header>
 
           {/* ── Árvore do organograma ─────────────────────────────────────── */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div className="org-tree">
 
             {/* Nó topo: Diretoria Geral */}
             <div
               role="region"
               aria-label="Diretoria Geral"
-              style={{
-                background: C.navy, color: "#fff",
-                borderRadius: 10, padding: "12px 36px",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
-                minWidth: 160,
-                boxShadow: "0 4px 14px rgba(30,43,110,0.35)",
-              }}
+              className="topo-node"
             >
               <TextoEditavel
                 valor={dados.iconeTopo}
                 aoMudar={setIconeTopo}
                 modoEdicao={modoEdicao}
                 tag="span"
-                estilo={{ fontSize: 26, display: "block", textAlign: "center" }}
+                className="topo-icon"
               />
               <TextoEditavel
                 valor={dados.noTopo}
                 aoMudar={setNoTopo}
                 modoEdicao={modoEdicao}
                 tag="span"
-                estilo={{
-                  fontSize: 15, fontWeight: 900, textAlign: "center",
-                  whiteSpace: "pre-line", display: "block", letterSpacing: "0.06em",
-                }}
+                className="topo-text"
               />
             </div>
 
             {/* Linha vertical do nó topo até o SVG conector */}
             <div
               className="linha-v-topo"
-              style={{ width: 2, height: 16, background: C.linha, flexShrink: 0 }}
               aria-hidden="true"
             />
 
@@ -545,7 +454,6 @@ export default function App() {
               viewBox={`0 0 ${svgW} 28`}
               preserveAspectRatio="none"
               aria-hidden="true"
-              style={{ display: "block" }}
             >
               {/* Barra horizontal */}
               <line
@@ -568,100 +476,59 @@ export default function App() {
             {/* ── Grade de departamentos ── */}
             {/* gap=0 é intencional para que o SVG acima alinhe perfeitamente */}
             <div
+              ref={gridRef}
               className="org-grid"
-              style={{
-                display: "grid",
-                gridTemplateColumns: `repeat(${N}, 1fr)`,
-                gap: 0,
-                width: "100%",
-                alignItems: "start",
-              }}
             >
               {dados.departamentos.map((dept) => (
                 <article
                   key={dept.id}
                   aria-label={`Departamento: ${dept.nome.replace("\n", " ")}`}
-                  style={{
-                    display: "flex", flexDirection: "column", alignItems: "center",
-                    padding: "0 4px",
-                  }}
+                  className="dept-article"
                 >
                   {/* Caixa do departamento */}
-                  <div style={{
-                    background: C.deptBg,
-                    border: `2px solid ${C.deptBorder}`,
-                    borderRadius: 10,
-                    padding: "12px 6px 8px",
-                    width: "100%",
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-                    minHeight: 90, boxSizing: "border-box",
-                  }}>
+                  <div className="dept-box">
                     <TextoEditavel
                       valor={dept.icone}
                       aoMudar={(v) => setIconeDept(dept.id, v)}
                       modoEdicao={modoEdicao}
                       tag="span"
-                      estilo={{ fontSize: 18, lineHeight: 1, display: "block", textAlign: "center" }}
+                      className="dept-icon"
                     />
                     <TextoEditavel
                       valor={dept.nome}
                       aoMudar={(v) => setNomeDept(dept.id, v)}
                       modoEdicao={modoEdicao}
                       tag="span"
-                      estilo={{
-                        fontSize: "clamp(9px, 0.85vw, 12px)",
-                        fontWeight: 900, color: C.navy,
-                        textAlign: "center", textTransform: "uppercase",
-                        letterSpacing: "0.03em", whiteSpace: "pre-line",
-                        display: "block", lineHeight: 1.3,
-                      }}
+                      className="dept-name"
                     />
                   </div>
 
                   {/* Linha vertical para processos */}
                   <div
                     aria-hidden="true"
-                    style={{ width: 2, height: 10, background: C.linha, flexShrink: 0 }}
+                    className="linha-v-processos"
                   />
 
                   {/* Caixa de processos */}
                   <section
                     aria-label={`Processos de ${dept.nome.replace("\n", " ")}`}
-                    style={{
-                      background: C.branco,
-                      border: `1.5px solid ${C.deptBorder}`,
-                      borderRadius: 8,
-                      padding: "10px 8px 12px",
-                      width: "100%", flex: 1,
-                      boxSizing: "border-box",
-                    }}
+                    className="processos-section"
                   >
                     <TextoEditavel
                       valor={dept.tituloProcessos || "PROCESSOS"}
                       aoMudar={(v) => setTituloProcessos(dept.id, v)}
                       modoEdicao={modoEdicao}
                       tag="h2"
-                      estilo={{
-                        fontSize: "clamp(8px, 0.65vw, 10px)",
-                        fontWeight: 900, color: C.navy,
-                        textTransform: "uppercase", letterSpacing: "0.09em",
-                        textAlign: "center",
-                        paddingBottom: 5, marginBottom: 6,
-                        borderBottom: `1px solid ${C.deptBorder}`,
-                      }}
+                      className="processos-title"
                     />
-                    <ul style={{ margin: 0, padding: "0 0 0 13px", listStyle: "disc" }}>
+                    <ul className="processos-list">
                       {dept.processos.map((proc, idx) => (
-                        <li key={idx} style={{
-                          fontSize: "clamp(8px, 0.7vw, 10px)",
-                          color: C.navy, marginBottom: 4, lineHeight: 1.4,
-                        }}>
+                        <li key={idx} className="processos-item">
                           <TextoEditavel
                             valor={proc}
                             aoMudar={(v) => setProcesso(dept.id, idx, v)}
                             modoEdicao={modoEdicao}
                             tag="span"
-                            estilo={{ display: "inline" }}
                           />
                         </li>
                       ))}

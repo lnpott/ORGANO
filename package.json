@@ -68,6 +68,7 @@
   },
   "devDependencies": {
     "@rollup/rollup-win32-x64-msvc": "^4.62.2",
+    "@types/node": "^26.0.0",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "4.7.0",
