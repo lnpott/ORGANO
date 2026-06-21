@@ -6,6 +6,7 @@ interface Departamento {
   id: string;
   nome: string;
   icone: string;
+  tituloProcessos?: string;
   processos: string[];
 }
 
@@ -24,8 +25,8 @@ interface OrgData {
     titulo: string;
     subtitulo: string;
     itens: ItemTransversal[];
+    iconeSecao?: string;
   };
-  rodape: string;
 }
 
 // ─── Dados padrão (espelho fiel do Figma) ────────────────────────────────────
@@ -39,6 +40,7 @@ const DADOS_PADRAO: OrgData = {
       id: "admin",
       nome: "DIRETORIA\nADMINISTRATIVA",
       icone: "👤",
+      tituloProcessos: "PROCESSOS",
       processos: [
         "Planejamento estratégico administrativo",
         "Gestão de recursos corporativos e indicadores",
@@ -52,6 +54,7 @@ const DADOS_PADRAO: OrgData = {
       id: "rh",
       nome: "RECURSOS\nHUMANOS (RH)",
       icone: "👥",
+      tituloProcessos: "PROCESSOS",
       processos: [
         "Recrutamento e seleção",
         "Admissão e integração de colaboradores",
@@ -66,6 +69,7 @@ const DADOS_PADRAO: OrgData = {
       id: "dp",
       nome: "DP / LOGÍSTICA",
       icone: "📋",
+      tituloProcessos: "PROCESSOS",
       processos: [
         "Administração de pessoal e folha de pagamento",
         "Obrigações trabalhistas e encargos",
@@ -80,6 +84,7 @@ const DADOS_PADRAO: OrgData = {
       id: "projetos",
       nome: "PROJETOS",
       icone: "📁",
+      tituloProcessos: "PROCESSOS",
       processos: [
         "Levantamento de escopo e requisitos",
         "Planejamento e engenharia",
@@ -94,6 +99,7 @@ const DADOS_PADRAO: OrgData = {
       id: "orcamento",
       nome: "ORÇAMENTO",
       icone: "🧮",
+      tituloProcessos: "PROCESSOS",
       processos: [
         "Levantamento de quantitativos",
         "Composição de custos diretos e indiretos",
@@ -108,6 +114,7 @@ const DADOS_PADRAO: OrgData = {
       id: "compras",
       nome: "COMPRAS /\nSUPRIMENTOS",
       icone: "🛒",
+      tituloProcessos: "PROCESSOS",
       processos: [
         "Planejamento de compras",
         "Cotações e negociação com fornecedores",
@@ -122,6 +129,7 @@ const DADOS_PADRAO: OrgData = {
       id: "almoxarifado",
       nome: "ALMOXARIFADO",
       icone: "🏭",
+      tituloProcessos: "PROCESSOS",
       processos: [
         "Recebimento e conferência de materiais",
         "Armazenagem e controle de estoques",
@@ -136,6 +144,7 @@ const DADOS_PADRAO: OrgData = {
   transversais: {
     titulo: "PROCESSOS TRANSVERSAIS",
     subtitulo: "(APLICÁVEIS A TODOS OS SETORES)",
+    iconeSecao: "⚙️",
     itens: [
       { id: "ssma",       icone: "🛡️", texto: "Saúde, Segurança e Meio Ambiente (SSMA)" },
       { id: "compliance", icone: "⚖️", texto: "Compliance & Ética Corporativa" },
@@ -144,8 +153,6 @@ const DADOS_PADRAO: OrgData = {
       { id: "melhoria",   icone: "👥", texto: "Melhoria Contínua e Gestão de Indicadores" },
     ],
   },
-  rodape:
-    "Este organograma e os processos são referências genéricas e devem ser adaptados à realidade específica da empresa e aos requisitos contratuais de cada projeto.",
 };
 
 // ─── Cores do design (extraídas da imagem do Figma) ──────────────────────────
@@ -289,6 +296,23 @@ export default function App() {
         ...d.transversais,
         itens: d.transversais.itens.map((it: ItemTransversal) => (it.id === id ? { ...it, icone: v } : it)),
       },
+    }));
+
+  const setIconeTransvSecao = (v: string) =>
+    setDados((d: OrgData) => ({
+      ...d,
+      transversais: {
+        ...d.transversais,
+        iconeSecao: v,
+      },
+    }));
+
+  const setTituloProcessos = (deptId: string, v: string) =>
+    setDados((d: OrgData) => ({
+      ...d,
+      departamentos: d.departamentos.map((dep: Departamento) =>
+        dep.id === deptId ? { ...dep, tituloProcessos: v } : dep
+      ),
     }));
 
   // ─── Exportar JSON ───
@@ -583,16 +607,20 @@ export default function App() {
                       boxSizing: "border-box",
                     }}
                   >
-                    <h2 style={{
-                      fontSize: "clamp(7px, 0.58vw, 9px)",
-                      fontWeight: 900, color: C.navy,
-                      textTransform: "uppercase", letterSpacing: "0.09em",
-                      textAlign: "center",
-                      paddingBottom: 4, marginBottom: 5,
-                      borderBottom: `1px solid ${C.deptBorder}`,
-                    }}>
-                      PROCESSOS
-                    </h2>
+                    <TextoEditavel
+                      valor={dept.tituloProcessos || "PROCESSOS"}
+                      aoMudar={(v) => setTituloProcessos(dept.id, v)}
+                      modoEdicao={modoEdicao}
+                      tag="h2"
+                      estilo={{
+                        fontSize: "clamp(7px, 0.58vw, 9px)",
+                        fontWeight: 900, color: C.navy,
+                        textTransform: "uppercase", letterSpacing: "0.09em",
+                        textAlign: "center",
+                        paddingBottom: 4, marginBottom: 5,
+                        borderBottom: `1px solid ${C.deptBorder}`,
+                      }}
+                    />
                     <ul style={{ margin: 0, padding: "0 0 0 11px", listStyle: "disc" }}>
                       {dept.processos.map((proc, idx) => (
                         <li key={idx} style={{
@@ -631,9 +659,9 @@ export default function App() {
               {/* Ícone + rótulo */}
               <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
                 <TextoEditavel
-                  valor="⚙️"
-                  aoMudar={() => {}}
-                  modoEdicao={false}
+                  valor={dados.transversais.iconeSecao || "⚙️"}
+                  aoMudar={setIconeTransvSecao}
+                  modoEdicao={modoEdicao}
                   tag="span"
                   estilo={{ fontSize: 22, display: "block" }}
                 />
