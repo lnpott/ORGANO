@@ -81,6 +81,21 @@ const DADOS_PADRAO: OrgData = {
       ],
     },
     {
+      id: "financeiro",
+      nome: "FINANCEIRO",
+      icone: "💰",
+      tituloProcessos: "PROCESSOS",
+      processos: [
+        "Gestão contábil e fiscal",
+        "Contas a pagar e a receber",
+        "Conciliação bancária",
+        "Gestão de fluxo de caixa",
+        "Elaboração de relatórios financeiros",
+        "Controle de impostos e tributos",
+        "Gestão de custos e despesas",
+      ],
+    },
+    {
       id: "projetos",
       nome: "PROJETOS",
       icone: "📁",
@@ -155,15 +170,16 @@ const DADOS_PADRAO: OrgData = {
   },
 };
 
-// ─── Cores do design (extraídas da imagem do Figma) ──────────────────────────
+// ─── Cores do design (baseadas no site Prospecta) ──────────────────────────
 
 const C = {
-  navy:       "#1E2B6E",
-  deptBg:     "#CBE5F5",
-  deptBorder: "#6AADD5",
-  linha:      "#2E4FA3",
+  navy:       "#0A1628",
+  deptBg:     "#E8EEF5",
+  deptBorder: "#1E3A5F",
+  linha:      "#2C5282",
   branco:     "#FFFFFF",
-  fundo:      "#F4F7FB",
+  fundo:      "#F7FAFC",
+  accent:     "#C53030",
 };
 
 // ─── Componente: Texto Editável ───────────────────────────────────────────────
@@ -418,44 +434,57 @@ export default function App() {
           style={{
             position: "sticky", top: 0, zIndex: 60,
             background: C.navy,
-            padding: "8px 20px",
-            display: "flex", alignItems: "center", gap: 8,
+            padding: "12px 24px",
+            display: "flex", alignItems: "center", gap: 16,
             flexWrap: "wrap",
             boxShadow: "0 2px 12px rgba(0,0,0,0.35)",
           }}
         >
+          {/* Logo Prospecta */}
+          <img
+            src="/prospecta-logo.jpeg"
+            alt="Prospecta Logo"
+            style={{
+              height: 40,
+              width: "auto",
+              objectFit: "contain",
+            }}
+          />
+
           <span style={{ color: "#fff", fontWeight: 900, fontSize: 13, marginRight: 6, letterSpacing: "0.03em" }}>
             📊 Organograma Editor
           </span>
 
-          <button className="btn-tool" onClick={exportarJSON} aria-label="Exportar JSON">
-            📥 Exportar JSON
-          </button>
-          <button className="btn-tool" onClick={importarJSON} aria-label="Importar JSON">
-            📤 Importar JSON
-          </button>
+          <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
+            <button className="btn-tool" onClick={exportarJSON} aria-label="Exportar JSON">
+              📥 Exportar JSON
+            </button>
+            <button className="btn-tool" onClick={importarJSON} aria-label="Importar JSON">
+              📤 Importar JSON
+            </button>
+          </div>
 
-          <span style={{ color: "#fcd34d", fontSize: 11, marginLeft: "auto", fontStyle: "italic" }}>
+          <span style={{ color: "#fcd34d", fontSize: 11, fontStyle: "italic" }}>
             ✏️ Clique em qualquer texto para editar — salvo automaticamente
           </span>
         </div>
 
         {/* ══ CONTEÚDO PRINCIPAL ═══════════════════════════════════════════ */}
         <main
-          style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 18px 52px" }}
+          style={{ maxWidth: 1600, margin: "0 auto", padding: "32px 24px 60px" }}
           role="main"
           aria-label="Organograma e processos por setor"
         >
 
           {/* Título principal */}
-          <header style={{ textAlign: "center", marginBottom: 22 }}>
+          <header style={{ textAlign: "center", marginBottom: 28 }}>
             <TextoEditavel
               valor={dados.titulo}
               aoMudar={setTitulo}
               modoEdicao={modoEdicao}
               tag="h1"
               estilo={{
-                fontSize: "clamp(16px, 2vw, 22px)",
+                fontSize: "clamp(18px, 2.2vw, 26px)",
                 fontWeight: 900,
                 color: C.navy,
                 letterSpacing: "0.07em",
@@ -475,9 +504,9 @@ export default function App() {
               aria-label="Diretoria Geral"
               style={{
                 background: C.navy, color: "#fff",
-                borderRadius: 8, padding: "10px 32px",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-                minWidth: 140,
+                borderRadius: 10, padding: "12px 36px",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
+                minWidth: 160,
                 boxShadow: "0 4px 14px rgba(30,43,110,0.35)",
               }}
             >
@@ -486,7 +515,7 @@ export default function App() {
                 aoMudar={setIconeTopo}
                 modoEdicao={modoEdicao}
                 tag="span"
-                estilo={{ fontSize: 22, display: "block", textAlign: "center" }}
+                estilo={{ fontSize: 26, display: "block", textAlign: "center" }}
               />
               <TextoEditavel
                 valor={dados.noTopo}
@@ -494,7 +523,7 @@ export default function App() {
                 modoEdicao={modoEdicao}
                 tag="span"
                 estilo={{
-                  fontSize: 13, fontWeight: 900, textAlign: "center",
+                  fontSize: 15, fontWeight: 900, textAlign: "center",
                   whiteSpace: "pre-line", display: "block", letterSpacing: "0.06em",
                 }}
               />
@@ -561,18 +590,18 @@ export default function App() {
                   <div style={{
                     background: C.deptBg,
                     border: `2px solid ${C.deptBorder}`,
-                    borderRadius: 8,
-                    padding: "8px 4px 6px",
+                    borderRadius: 10,
+                    padding: "12px 6px 8px",
                     width: "100%",
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                    minHeight: 78, boxSizing: "border-box",
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                    minHeight: 90, boxSizing: "border-box",
                   }}>
                     <TextoEditavel
                       valor={dept.icone}
                       aoMudar={(v) => setIconeDept(dept.id, v)}
                       modoEdicao={modoEdicao}
                       tag="span"
-                      estilo={{ fontSize: 15, lineHeight: 1, display: "block", textAlign: "center" }}
+                      estilo={{ fontSize: 18, lineHeight: 1, display: "block", textAlign: "center" }}
                     />
                     <TextoEditavel
                       valor={dept.nome}
@@ -580,7 +609,7 @@ export default function App() {
                       modoEdicao={modoEdicao}
                       tag="span"
                       estilo={{
-                        fontSize: "clamp(7.5px, 0.7vw, 10px)",
+                        fontSize: "clamp(9px, 0.85vw, 12px)",
                         fontWeight: 900, color: C.navy,
                         textAlign: "center", textTransform: "uppercase",
                         letterSpacing: "0.03em", whiteSpace: "pre-line",
@@ -601,8 +630,8 @@ export default function App() {
                     style={{
                       background: C.branco,
                       border: `1.5px solid ${C.deptBorder}`,
-                      borderRadius: 6,
-                      padding: "7px 6px 10px",
+                      borderRadius: 8,
+                      padding: "10px 8px 12px",
                       width: "100%", flex: 1,
                       boxSizing: "border-box",
                     }}
@@ -613,19 +642,19 @@ export default function App() {
                       modoEdicao={modoEdicao}
                       tag="h2"
                       estilo={{
-                        fontSize: "clamp(7px, 0.58vw, 9px)",
+                        fontSize: "clamp(8px, 0.65vw, 10px)",
                         fontWeight: 900, color: C.navy,
                         textTransform: "uppercase", letterSpacing: "0.09em",
                         textAlign: "center",
-                        paddingBottom: 4, marginBottom: 5,
+                        paddingBottom: 5, marginBottom: 6,
                         borderBottom: `1px solid ${C.deptBorder}`,
                       }}
                     />
-                    <ul style={{ margin: 0, padding: "0 0 0 11px", listStyle: "disc" }}>
+                    <ul style={{ margin: 0, padding: "0 0 0 13px", listStyle: "disc" }}>
                       {dept.processos.map((proc, idx) => (
                         <li key={idx} style={{
-                          fontSize: "clamp(7px, 0.63vw, 9px)",
-                          color: C.navy, marginBottom: 3, lineHeight: 1.38,
+                          fontSize: "clamp(8px, 0.7vw, 10px)",
+                          color: C.navy, marginBottom: 4, lineHeight: 1.4,
                         }}>
                           <TextoEditavel
                             valor={proc}
@@ -642,86 +671,6 @@ export default function App() {
               ))}
             </div>
           </div>
-
-          {/* ══ PROCESSOS TRANSVERSAIS ═══════════════════════════════════════ */}
-          <section
-            aria-label="Processos transversais"
-            style={{
-              marginTop: 20,
-              background: C.deptBg,
-              border: `2px solid ${C.deptBorder}`,
-              borderRadius: 8,
-              padding: "11px 14px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
-
-              {/* Ícone + rótulo */}
-              <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
-                <TextoEditavel
-                  valor={dados.transversais.iconeSecao || "⚙️"}
-                  aoMudar={setIconeTransvSecao}
-                  modoEdicao={modoEdicao}
-                  tag="span"
-                  estilo={{ fontSize: 22, display: "block" }}
-                />
-                <div>
-                  <TextoEditavel
-                    valor={dados.transversais.titulo}
-                    aoMudar={setTransvTitulo}
-                    modoEdicao={modoEdicao}
-                    tag="h2"
-                    estilo={{
-                      fontSize: 11, fontWeight: 900, color: C.navy,
-                      textTransform: "uppercase", letterSpacing: "0.06em",
-                      display: "block", margin: 0,
-                    }}
-                  />
-                  <TextoEditavel
-                    valor={dados.transversais.subtitulo}
-                    aoMudar={setTransvSubtitulo}
-                    modoEdicao={modoEdicao}
-                    tag="span"
-                    estilo={{ fontSize: 9, color: C.navy, display: "block" }}
-                  />
-                </div>
-              </div>
-
-              {/* Itens transversais */}
-              <div
-                className="transv-itens"
-                style={{ display: "flex", gap: 7, flex: 1, flexWrap: "wrap" }}
-              >
-                {dados.transversais.itens.map((item) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      background: "rgba(255,255,255,0.68)",
-                      border: `1px solid ${C.deptBorder}`,
-                      borderRadius: 6, padding: "6px 9px",
-                      flex: 1, minWidth: 130,
-                    }}
-                  >
-                    <TextoEditavel
-                      valor={item.icone}
-                      aoMudar={(v) => setIconeTransv(item.id, v)}
-                      modoEdicao={modoEdicao}
-                      tag="span"
-                      estilo={{ fontSize: 15, flexShrink: 0, display: "block" }}
-                    />
-                    <TextoEditavel
-                      valor={item.texto}
-                      aoMudar={(v) => setTransvItem(item.id, v)}
-                      modoEdicao={modoEdicao}
-                      tag="span"
-                      estilo={{ fontSize: 9.5, color: C.navy, fontWeight: 700 }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
 
         </main>
       </div>
